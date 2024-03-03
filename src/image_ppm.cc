@@ -101,3 +101,27 @@ void ImagePPM::SetPixelsAndHeight(Pixel** new_pixels, int new_height) {
   pixels_ = new_pixels;
   height_ = new_height;
 }
+
+// outputs the image in plain PPM format to os
+std::ostream& operator<<(std::ostream& os, const ImagePPM& image) {
+  // filetype / magic number
+  os << "P3\n";
+
+  // height and width of image
+  os << image.GetWidth() << " " << image.GetHeight() << "\n";
+
+  // maximum color value
+  os << image.GetMaxColorValue() << "\n";
+
+  // write out pixel data
+  for (int row = 0; row < image.GetHeight(); row++) {
+    for (int column = 0; column < image.GetWidth(); column++) {
+      Pixel current_pixel = image.GetPixel(row, column);
+      os << current_pixel.GetRed() << "\n";
+      os << current_pixel.GetGreen() << "\n";
+      os << current_pixel.GetBlue() << "\n";
+    }
+  }
+
+  return os;
+}
