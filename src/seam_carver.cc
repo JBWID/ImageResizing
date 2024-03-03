@@ -131,6 +131,58 @@ int* SeamCarver::GetVerticalSeam() const {
       array[row][column] = GetEnergy(row, column) + lowest;
     }
   }
+  // tracing vertical seam from top row to bottom row, starting with lowest
+  // energy pixel
+  int* seam = new int[height_];
+
+  // deciding which pixel to start from if equal, start from leftmost
+  // since iterating from left to right, it will always be leftmost
+  int starting_column = 0;
+  for (int column = 0; column < width_; column++) {
+    if (array[0][column] < array[0][starting_column]) {
+      starting_column = array[0][column];
+    }
+  }
+
+  // start tracing downwards
+  seam[0] = starting_column;
+  int column = starting_column;
+  for (int row = 1; row < height_; row++) {
+    int left = 0;
+    int middle = array[row + 1][column];
+    int right = 0;
+
+    // handling wrap around cases
+    if (column == 0) {
+      left = array[row + 1][width_ - 1];
+    } else {
+      left = array[row + 1][column - 1];
+    }
+    if (column == width_ - 1) {
+      right = array[row + 1][0];
+    } else {
+      right = array[row + 1][column + 1];
+    }
+
+    // choosing lowest column
+    if (left < middle && left < right) {
+      if (column == 0) {
+        column = width_ - 1;
+      }
+      column--;
+    }
+    if (middle < left && middle < right) {
+      column = column;
+    }
+    if (right < middle && right < left) {
+      if (column == width_ - 1) {
+        column = 0;
+      }
+      column = column + 1;
+    }
+    seam[row] = column;
+  }
+  return seam;
 }
 
 // Removes one horizontal seam in image_. Creating a public member function of
