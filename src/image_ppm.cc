@@ -97,13 +97,21 @@ int ImagePPM::GetMaxColorValue() const { return max_color_value_; }
 
 // helper function to remove seam
 void ImagePPM::SetPixelsAndHeight(Pixel** new_pixels, int new_height) {
-  Clear();
+  for (int i = 0; i < height_; i++) {
+    delete[] pixels_[i];
+  }
+  delete[] pixels_;
+
   pixels_ = new_pixels;
   height_ = new_height;
 }
 
 void ImagePPM::SetPixelsAndWidth(Pixel** new_pixels, int new_width) {
-  Clear();
+  for (int i = 0; i < height_; i++) {
+    delete[] pixels_[i];
+  }
+  delete[] pixels_;
+
   pixels_ = new_pixels;
   width_ = new_width;
 }
