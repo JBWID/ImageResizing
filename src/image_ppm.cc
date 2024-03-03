@@ -94,3 +94,10 @@ Pixel ImagePPM::GetPixel(int row, int col) const { return pixels_[row][col]; }
 
 // Returns the max color value of the image (this is not always 255!)
 int ImagePPM::GetMaxColorValue() const { return max_color_value_; }
+
+// helper function to remove seam
+void ImagePPM::SetPixelsAndHeight(Pixel** new_pixels, int new_height) {
+  Clear();
+  pixels_ = new_pixels;
+  height_ = new_height;
+}

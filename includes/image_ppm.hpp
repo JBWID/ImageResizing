@@ -44,6 +44,8 @@ public:
   // an image in plain PPM format
   friend std::istream& operator>>(std::istream& is, ImagePPM& image);
 
+  void SetPixelsAndHeight(Pixel** new_pixels, int new_height);
+
 private:
   int height_ = 0;
   int width_ = 0;
