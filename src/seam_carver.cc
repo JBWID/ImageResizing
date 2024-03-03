@@ -268,7 +268,35 @@ int* SeamCarver::GetVerticalSeam() const {
 }
 // Removes one horizontal seam in image_. Creating a public member function of
 // the ImagePPM class to carve a seam might help.
-void SeamCarver::RemoveHorizontalSeam() {}
+void SeamCarver::RemoveHorizontalSeam() {
+  int* seam = GetHorizontalSeam();
+
+  // create a new 2d array for the new image with 1 less row
+  Pixel** new_array = new Pixel*[height_ - 1];
+  for (int i = 0; i < height_ - 1; i++) {
+    new_array[i] = new Pixel[width_];
+  }
+
+  // copy old array, but skip over seam
+  for (int row = 0; row < height_; row++) {
+    for (int column = 0; column < width_; column++) {
+      // copy pixels above the seam
+      if (row < seam[column]) {
+        new_array[row][column] = image_.GetPixel(row, column);
+
+        // move pixxels upwards if its below the seam
+      } else if (row > seam[column]) {
+        new_array[row - 1][column] = image_.GetPixel(row, column);
+      }
+    }
+  }
+
+  // update the picture
+  image_.SetPixelsAndHeight(new_array, image_.GetHeight() - 1);
+
+  // remove memory used by seam
+  delete[] seam;
+}
 
 // Removes one vertical seam in image_. Creating a public member function of
 // the ImagePPM class to carve a seam might help.
