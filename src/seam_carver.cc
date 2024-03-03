@@ -279,21 +279,19 @@ void SeamCarver::RemoveHorizontalSeam() {
   }
 
   // copy old array, but skip over seam
-  for (int row = 0; row < height_; row++) {
-    for (int column = 0; column < width_; column++) {
-      // copy pixels above the seam
-      if (row < seam[column]) {
-        new_array[row][column] = image_.GetPixel(row, column);
-
-        // move pixxels upwards if its below the seam
-      } else if (row > seam[column]) {
-        new_array[row - 1][column] = image_.GetPixel(row, column);
+  for (int column = 0; column < width_; column++) {
+    int new_row = 0;
+    for (int row = 0; row < height_; row++) {
+      // if current pixel is not a part of the seam, copy it
+      if (row != seam[column]) {
+        new_array[new_row][column] = image_.GetPixel(row, column);
+        new_row++;
       }
     }
   }
 
   // update the picture
-  image_.SetPixelsAndHeight(new_array, image_.GetHeight() - 1);
+  image_.SetPixelsAndHeight(new_array, height_ - 1);
 
   // remove memory used by seam
   delete[] seam;
@@ -304,7 +302,7 @@ void SeamCarver::RemoveHorizontalSeam() {
 void SeamCarver::RemoveVerticalSeam() {
   int* seam = GetVerticalSeam();
 
-  // create a new 2d array for the new image with 1 less row
+  // create a new 2d array for the new image with 1 less column
   Pixel** new_array = new Pixel*[height_];
   for (int i = 0; i < height_; i++) {
     new_array[i] = new Pixel[width_ - 1];
@@ -316,7 +314,7 @@ void SeamCarver::RemoveVerticalSeam() {
     for (int column = 0; column < width_; column++) {
       // if current pixel is not a part of the seam, copy it
       if (column != seam[row]) {
-        new_array[row][col] = image_.GetPixel(row, col);
+        new_array[row][col] = image_.GetPixel(row, column);
         col++;
       }
     }
@@ -324,6 +322,8 @@ void SeamCarver::RemoveVerticalSeam() {
 
   // update the picture
   image_.SetPixelsAndWidth(new_array, width_ - 1);
+
+  width_--;
 
   // remove memory used by seam
   delete[] seam;
