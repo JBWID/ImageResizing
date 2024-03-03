@@ -82,8 +82,13 @@ int* SeamCarver::GetHorizontalSeam() const {}
 // Returns the vertical seam of image_ with the least amount of energy. Notice
 // the array returned by this method is on the free store; keep in mind when the
 // memory should be free’d.
+int* SeamCarver::GetHorizontalSeam() const {}
+
+// Returns the vertical seam of image_ with the least amount of energy. Notice
+// the array returned by this method is on the free store; keep in mind when the
+// memory should be free’d.
 int* SeamCarver::GetVerticalSeam() const {
-      // make energy 2d array, populate with energies using memoization algorithm
+  // make energy 2d array, populate with energies using memoization algorithm
   // make a vertical array for n number of rows
   int** array = new int*[height_];
   // make columns for every row
@@ -131,6 +136,7 @@ int* SeamCarver::GetVerticalSeam() const {
       array[row][column] = GetEnergy(row, column) + lowest;
     }
   }
+
   // tracing vertical seam from top row to bottom row, starting with lowest
   // energy pixel
   int* seam = new int[height_];
@@ -140,49 +146,31 @@ int* SeamCarver::GetVerticalSeam() const {
   int starting_column = 0;
   for (int column = 0; column < width_; column++) {
     if (array[0][column] < array[0][starting_column]) {
-      starting_column = array[0][column];
+      starting_column = column;
     }
   }
 
   // start tracing downwards
   seam[0] = starting_column;
-  int column = starting_column;
+  int column = 0;
   for (int row = 1; row < height_; row++) {
-    int left = 0;
-    int middle = array[row + 1][column];
-    int right = 0;
+    column = seam[row - 1];
 
-    // handling wrap around cases
-    if (column == 0) {
-      left = array[row + 1][width_ - 1];
-    } else {
-      left = array[row + 1][column - 1];
+    // edge case: if equal, always pick middle, then left then right
+    int lowest = array[row][column];
+    int change = 0;
+    if (column > 0 && array[row][column - 1] < lowest) {
+      lowest = array[row][column - 1];
+      change = -1;
     }
-    if (column == width_ - 1) {
-      right = array[row + 1][0];
-    } else {
-      right = array[row + 1][column + 1];
+    if (column < width_ - 1 && array[row][column + 1] < lowest) {
+      lowest = array[row][column + 1];
+      change = 1;
     }
 
-    // choosing lowest column
-    if (left < middle && left < right) {
-      if (column == 0) {
-        column = width_ - 1;
-      }
-      column--;
-    }
-    if (middle < left && middle < right) {
-      column = column;
-    }
-    if (right < middle && right < left) {
-      if (column == width_ - 1) {
-        column = 0;
-      }
-      column = column + 1;
-    }
-    seam[row] = column;
+    // update seam column
+    seam[row] = column + change;
   }
-  
   // free allocated memory for array
   for (int i = 0; i < height_; i++) {
     delete[] array[i];
