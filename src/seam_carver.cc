@@ -82,7 +82,56 @@ int* SeamCarver::GetHorizontalSeam() const {}
 // Returns the vertical seam of image_ with the least amount of energy. Notice
 // the array returned by this method is on the free store; keep in mind when the
 // memory should be free’d.
-int* SeamCarver::GetVerticalSeam() const {}
+int* SeamCarver::GetVerticalSeam() const {
+      // make energy 2d array, populate with energies using memoization algorithm
+  // make a vertical array for n number of rows
+  int** array = new int*[height_];
+  // make columns for every row
+  for (int i = 0; i < height_; i++) {
+    array[i] = new int[width_];
+  }
+
+  // populate bottom row with actual energy values
+  for (int col = 0; col < width_; col++) {
+    array[height_ - 1][col] = GetEnergy(height_ - 1, col);
+  }
+
+  // calculate and populate for every row upwards
+  for (int row = height_ - 2; row >= 0; row--) {
+    for (int column = 0; column < width_; column++) {
+      int left = 0;
+      int middle = GetEnergy(row + 1, column);
+      int right = 0;
+
+      // handling wrap around cases
+      if (column == 0) {
+        left = GetEnergy(row + 1, width_ - 1);
+      } else {
+        left = GetEnergy(row + 1, column - 1);
+      }
+      if (column == width_ - 1) {
+        right = GetEnergy(row + 1, 0);
+      } else {
+        right = GetEnergy(row + 1, column + 1);
+      }
+
+      int lowest = 0;
+      // which one is lowest
+      if (left < middle && left < right) {
+        lowest = left;
+      }
+      if (middle < left && middle < right) {
+        lowest = middle;
+      }
+      if (right < middle && right < left) {
+        lowest = right;
+      }
+
+      // set current pixel to lowest energy
+      array[row][column] = GetEnergy(row, column) + lowest;
+    }
+  }
+}
 
 // Removes one horizontal seam in image_. Creating a public member function of
 // the ImagePPM class to carve a seam might help.
