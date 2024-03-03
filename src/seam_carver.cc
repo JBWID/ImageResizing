@@ -33,15 +33,20 @@ int SeamCarver::GetWidth() const { return width_; }
 // Returns the energy of the pixel at (row, col) of the instance’s image. You
 // may assume that row and col will always be within bounds.
 int SeamCarver::GetEnergy(int row, int col) const {
-  // calculating column energy (horizontal)
-  Pixel left;
+  // calculating energy E
+  int energy = GetRowEnergy(row, col) + GetColEnergy(row, col);
+  return energy;
+}
+
+int SeamCarver::GetColEnergy(int row, int col) const {
+  Pixel left(0, 0, 0);
   // handling wrap around cases
   if (col - 1 < 0) {
     left = image_.GetPixel(row, width_ - 1);
   } else {
     left = image_.GetPixel(row, col - 1);
   }
-  Pixel right;
+  Pixel right(0, 0, 0);
   if (col + 1 > width_ - 1) {
     right = image_.GetPixel(row, 0);
   } else {
@@ -51,16 +56,18 @@ int SeamCarver::GetEnergy(int row, int col) const {
   int g_col = right.GetGreen() - left.GetGreen();
   int b_col = right.GetBlue() - left.GetBlue();
   int col_change_squared = r_col * r_col + g_col * g_col + b_col * b_col;
+  return col_change_squared;
+}
 
-  // calculating row energy (vertical)
+int SeamCarver::GetRowEnergy(int row, int col) const {
   // handing wrap around cases
-  Pixel top;
+  Pixel top(0, 0, 0);
   if (row - 1 < 0) {
     top = image_.GetPixel((height_ - 1), col);
   } else {
     top = image_.GetPixel((row - 1), col);
   }
-  Pixel bottom;
+  Pixel bottom(0, 0, 0);
   if (row + 1 > height_ - 1) {
     bottom = image_.GetPixel(0, col);
   } else {
@@ -70,10 +77,7 @@ int SeamCarver::GetEnergy(int row, int col) const {
   int g_row = top.GetGreen() - bottom.GetGreen();
   int b_row = top.GetBlue() - bottom.GetBlue();
   int row_change_squared = r_row * r_row + g_row * g_row + b_row * b_row;
-
-  // calculating energy E
-  int energy = row_change_squared + col_change_squared;
-  return energy;
+  return row_change_squared;
 }
 
 // finding vertical and horizontal seam using memoization algorithm
@@ -81,26 +85,34 @@ int SeamCarver::GetEnergy(int row, int col) const {
 // the array returned by this method is on the free store; keep in mind when the
 // memory should be free’d.
 int* SeamCarver::GetHorizontalSeam() const {
+  int** array = HorizontalInitPopulateEnergyArray();
+  int* seam = TraceHorizontalSeam(array);
+
+  // free allocated memory for array
+  for (int i = 0; i < height_; i++) {
+    delete[] array[i];
+  }
+  delete[] array;
+
+  return seam;
+}
+
+int** SeamCarver::HorizontalInitPopulateEnergyArray() const {
   // make energy 2d array, populate with energies using memoization algorithm
-  // make a horizontal array for n number of columns
   int** array = new int*[height_];
-  // make rows for every column
   for (int i = 0; i < height_; i++) {
     array[i] = new int[width_];
   }
-
   // populate rightmost column with actual energy values
   for (int row = 0; row < height_; row++) {
     array[row][width_ - 1] = GetEnergy(row, width_ - 1);
   }
-
   // calculate and populate for every column leftwards
   for (int col = width_ - 2; col >= 0; col--) {
     for (int row = 0; row < height_; row++) {
       int top = 0;
       int middle = GetEnergy(row, col + 1);
       int bottom = 0;
-
       // handling wrap around cases
       if (row == 0) {
         top = GetEnergy(height_ - 1, col + 1);
@@ -112,7 +124,6 @@ int* SeamCarver::GetHorizontalSeam() const {
       } else {
         bottom = GetEnergy(row + 1, col + 1);
       }
-
       int lowest = 0;
       // which one is lowest
       if (top < middle && top < bottom) {
@@ -122,12 +133,13 @@ int* SeamCarver::GetHorizontalSeam() const {
       } else {
         lowest = bottom;
       }
-
-      // set current pixel to lowest energy from right
       array[row][col] = GetEnergy(row, col) + lowest;
     }
   }
+  return array;
+}
 
+int* SeamCarver::TraceHorizontalSeam(int** array) const {
   // tracing horizontal seam from leftmost column to rightmost, starting with
   // lowest energy pixel
   int* seam = new int[width_];
@@ -162,6 +174,15 @@ int* SeamCarver::GetHorizontalSeam() const {
     // update seam row based on the lowest energy from the left
     seam[col] = current_row + change;
   }
+  return seam;
+}
+
+// Returns the vertical seam of image_ with the least amount of energy. Notice
+// the array returned by this method is on the free store; keep in mind when the
+// memory should be free’d.
+int* SeamCarver::GetVerticalSeam() const {
+  int** array = VerticalInitPopulateEnergyArray();
+  int* seam = TraceVerticalSeam(array);
 
   // free allocated memory for array
   for (int i = 0; i < height_; i++) {
@@ -172,31 +193,22 @@ int* SeamCarver::GetHorizontalSeam() const {
   return seam;
 }
 
-// Returns the vertical seam of image_ with the least amount of energy. Notice
-// the array returned by this method is on the free store; keep in mind when the
-// memory should be free’d.
-int* SeamCarver::GetVerticalSeam() const {
+int** SeamCarver::VerticalInitPopulateEnergyArray() const {
   // make energy 2d array, populate with energies using memoization algorithm
-  // make a vertical array for n number of rows
   int** array = new int*[height_];
   // make columns for every row
   for (int i = 0; i < height_; i++) {
     array[i] = new int[width_];
   }
-
   // populate bottom row with actual energy values
   for (int col = 0; col < width_; col++) {
     array[height_ - 1][col] = GetEnergy(height_ - 1, col);
   }
-
-  // calculate and populate for every row upwards
   for (int row = height_ - 2; row >= 0; row--) {
     for (int column = 0; column < width_; column++) {
       int left = 0;
       int middle = GetEnergy(row + 1, column);
       int right = 0;
-
-      // handling wrap around cases
       if (column == 0) {
         left = GetEnergy(row + 1, width_ - 1);
       } else {
@@ -207,9 +219,7 @@ int* SeamCarver::GetVerticalSeam() const {
       } else {
         right = GetEnergy(row + 1, column + 1);
       }
-
       int lowest = 0;
-      // which one is lowest
       if (left < middle && left < right) {
         lowest = left;
       }
@@ -219,12 +229,13 @@ int* SeamCarver::GetVerticalSeam() const {
       if (right < middle && right < left) {
         lowest = right;
       }
-
-      // set current pixel to lowest energy
       array[row][column] = GetEnergy(row, column) + lowest;
     }
   }
+  return array;
+}
 
+int* SeamCarver::TraceVerticalSeam(int** array) const {
   // tracing vertical seam from top row to bottom row, starting with lowest
   // energy pixel
   int* seam = new int[height_];
@@ -259,14 +270,9 @@ int* SeamCarver::GetVerticalSeam() const {
     // update seam column
     seam[row] = column + change;
   }
-  // free allocated memory for array
-  for (int i = 0; i < height_; i++) {
-    delete[] array[i];
-  }
-  delete[] array;
-
   return seam;
 }
+
 // Removes one horizontal seam in image_. Creating a public member function of
 // the ImagePPM class to carve a seam might help.
 void SeamCarver::RemoveHorizontalSeam() {
