@@ -102,6 +102,12 @@ void ImagePPM::SetPixelsAndHeight(Pixel** new_pixels, int new_height) {
   height_ = new_height;
 }
 
+void ImagePPM::SetPixelsAndWidth(Pixel** new_pixels, int new_width) {
+  Clear();
+  pixels_ = new_pixels;
+  width_ = new_width;
+}
+
 // outputs the image in plain PPM format to os
 std::ostream& operator<<(std::ostream& os, const ImagePPM& image) {
   // filetype / magic number

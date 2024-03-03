@@ -322,7 +322,7 @@ void SeamCarver::RemoveVerticalSeam() {
   }
 
   // update the picture
-  image_.SetPixelsAndHeight(new_array, width_ - 1);
+  image_.SetPixelsAndWidth(new_array, width_ - 1);
 
   // remove memory used by seam
   delete[] seam;

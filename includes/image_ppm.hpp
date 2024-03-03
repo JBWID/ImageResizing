@@ -46,6 +46,8 @@ public:
 
   void SetPixelsAndHeight(Pixel** new_pixels, int new_height);
 
+  void SetPixelsAndWidth(Pixel** new_pixels, int new_width);
+
 private:
   int height_ = 0;
   int width_ = 0;
