@@ -148,13 +148,14 @@ int* SeamCarver::GetHorizontalSeam() const {
     current_row = seam[col - 1];
 
     // edge case: if equal, always pick middle, then top then bottom
-    int lowest = array[current_row][col - 1];
+    int lowest = array[current_row][col];
     int change = 0;
-    if (current_row > 0 && array[current_row - 1][col - 1] < lowest) {
-      lowest = array[current_row - 1][col - 1];
+    if (current_row > 0 && array[current_row - 1][col] < lowest) {
+      lowest = array[current_row - 1][col];
       change = -1;
     }
-    if (current_row < height_ - 1 && array[current_row + 1][col - 1] < lowest) {
+    if (current_row < height_ - 1 && array[current_row + 1][col] < lowest) {
+      lowest = array[current_row + 1][col];
       change = 1;
     }
 
