@@ -182,6 +182,13 @@ int* SeamCarver::GetVerticalSeam() const {
     }
     seam[row] = column;
   }
+
+    // free allocated memory for array
+  for (int i = 0; i < height_; i++) {
+    delete[] array[i];
+  }
+  delete[] array;
+  
   return seam;
 }
 
