@@ -1,5 +1,7 @@
 #include "seam_carver.hpp"
 
+#include "iostream"
+
 // implement the rest of SeamCarver's functions here
 
 // given functions below, DO NOT MODIFY
@@ -74,15 +76,100 @@ int SeamCarver::GetEnergy(int row, int col) const {
   return energy;
 }
 
+// finding vertical and horizontal seam using memoization algorithm
 // Returns the horizontal seam of image_ with the least amount of energy. Notice
 // the array returned by this method is on the free store; keep in mind when the
 // memory should be free’d.
-int* SeamCarver::GetHorizontalSeam() const {}
+int* SeamCarver::GetHorizontalSeam() const {
+  // make energy 2d array, populate with energies using memoization algorithm
+  // make a horizontal array for n number of columns
+  int** array = new int*[height_];
+  // make rows for every column
+  for (int i = 0; i < height_; i++) {
+    array[i] = new int[width_];
+  }
 
-// Returns the vertical seam of image_ with the least amount of energy. Notice
-// the array returned by this method is on the free store; keep in mind when the
-// memory should be free’d.
-int* SeamCarver::GetHorizontalSeam() const {}
+  // populate rightmost column with actual energy values
+  for (int row = 0; row < height_; row++) {
+    array[row][width_ - 1] = GetEnergy(row, width_ - 1);
+  }
+
+  // calculate and populate for every column leftwards
+  for (int col = width_ - 2; col >= 0; col--) {
+    for (int row = 0; row < height_; row++) {
+      int top = 0;
+      int middle = GetEnergy(row, col + 1);
+      int bottom = 0;
+
+      // handling wrap around cases
+      if (row == 0) {
+        top = GetEnergy(height_ - 1, col + 1);
+      } else {
+        top = GetEnergy(row - 1, col + 1);
+      }
+      if (row == height_ - 1) {
+        bottom = GetEnergy(0, col + 1);
+      } else {
+        bottom = GetEnergy(row + 1, col + 1);
+      }
+
+      int lowest = 0;
+      // which one is lowest
+      if (top < middle && top < bottom) {
+        lowest = top;
+      } else if (middle < top && middle < bottom) {
+        lowest = middle;
+      } else {
+        lowest = bottom;
+      }
+
+      // set current pixel to lowest energy from right
+      array[row][col] = GetEnergy(row, col) + lowest;
+    }
+  }
+
+  // tracing horizontal seam from leftmost column to rightmost, starting with
+  // lowest energy pixel
+  int* seam = new int[width_];
+
+  // deciding which pixel to start from if equal, start from topmost
+  // since iterating from top to bottom, it will always be topmost
+  int starting_row = 0;
+  for (int row = 1; row < height_; row++) {
+    if (array[row][0] < array[starting_row][0]) {
+      starting_row = row;
+    }
+  }
+
+  // start tracing rightwards
+  seam[0] = starting_row;
+  int current_row = starting_row;
+  for (int col = 1; col < width_; col++) {
+    current_row = seam[col - 1];
+
+    // edge case: if equal, always pick middle, then top then bottom
+    int lowest = array[current_row][col - 1];
+    int change = 0;
+    if (current_row > 0 && array[current_row - 1][col - 1] < lowest) {
+      lowest = array[current_row - 1][col - 1];
+      change = -1;
+    }
+    if (current_row < height_ - 1 && array[current_row + 1][col - 1] < lowest) {
+      change = 1;
+    }
+
+    // update seam row based on the lowest energy from the left
+    seam[col] = current_row + change;
+  }
+
+  // free allocated memory for array
+  for (int i = 0; i < height_; i++) {
+    delete[] array[i];
+  }
+  delete[] array;
+
+  return seam;
+}
 
 // Returns the vertical seam of image_ with the least amount of energy. Notice
 // the array returned by this method is on the free store; keep in mind when the
@@ -179,11 +266,10 @@ int* SeamCarver::GetVerticalSeam() const {
 
   return seam;
 }
-
 // Removes one horizontal seam in image_. Creating a public member function of
 // the ImagePPM class to carve a seam might help.
 void SeamCarver::RemoveHorizontalSeam() {}
 
-// Removes one vertical seam in image_. Creating a public member function of the
-// ImagePPM class to carve a seam might help.
+// Removes one vertical seam in image_. Creating a public member function of
+// the ImagePPM class to carve a seam might help.
 void SeamCarver::RemoveVerticalSeam() {}
