@@ -299,6 +299,8 @@ void SeamCarver::RemoveHorizontalSeam() {
   // update the picture
   image_.SetPixelsAndHeight(new_array, height_ - 1);
 
+  height_--;
+
   // remove memory used by seam
   delete[] seam;
 }

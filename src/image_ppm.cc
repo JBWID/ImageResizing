@@ -1,5 +1,9 @@
 #include "image_ppm.hpp"
 
+// implement the rest of ImagePPM's functions here
+
+// given functions below, DO NOT MODIFY
+
 // Overloaded constructor. Initializes the ImagePPM based on a plain PPM file at
 // the given path
 ImagePPM::ImagePPM(const std::string& path) {
@@ -89,8 +93,15 @@ std::istream& operator>>(std::istream& is, ImagePPM& image) {
   return is;
 }
 
+// functions to implement
+
 // Returns the pixel in the image at (row, col).
-Pixel ImagePPM::GetPixel(int row, int col) const { return pixels_[row][col]; }
+Pixel ImagePPM::GetPixel(int row, int col) const {
+  if (row < 0 || row >= height_ || col < 0 || col >= width_) {
+    throw std::runtime_error("row col out of bounds");
+  }
+  return pixels_[row][col];
+}
 
 // Returns the max color value of the image (this is not always 255!)
 int ImagePPM::GetMaxColorValue() const { return max_color_value_; }
