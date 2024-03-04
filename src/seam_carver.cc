@@ -30,6 +30,19 @@ int SeamCarver::GetHeight() const { return height_; }
 // Returns the width of the instance’s image
 int SeamCarver::GetWidth() const { return width_; }
 
+int SeamCarver::CalculateMaxEnergy() const {
+  int max_energy = 0;
+  for (int row = 0; row < height_; row++) {
+    for (int col = 0; col < width_; col++) {
+      int energy = GetEnergy(row, col);
+      if (energy > max_energy) {
+        max_energy = energy;
+      }
+    }
+  }
+  return max_energy;
+}
+
 // Returns the energy of the pixel at (row, col) of the instance’s image. You
 // may assume that row and col will always be within bounds.
 int SeamCarver::GetEnergy(int row, int col) const {
@@ -55,7 +68,7 @@ int SeamCarver::GetColEnergy(int row, int col) const {
   int r_col = right.GetRed() - left.GetRed();
   int g_col = right.GetGreen() - left.GetGreen();
   int b_col = right.GetBlue() - left.GetBlue();
-  int col_change_squared = r_col * r_col + g_col * g_col + b_col * b_col;
+  int col_change_squared = (r_col * r_col) + (g_col * g_col) + (b_col * b_col);
   return col_change_squared;
 }
 
@@ -76,7 +89,7 @@ int SeamCarver::GetRowEnergy(int row, int col) const {
   int r_row = top.GetRed() - bottom.GetRed();
   int g_row = top.GetGreen() - bottom.GetGreen();
   int b_row = top.GetBlue() - bottom.GetBlue();
-  int row_change_squared = r_row * r_row + g_row * g_row + b_row * b_row;
+  int row_change_squared = (r_row * r_row) + (g_row * g_row) + (b_row * b_row);
   return row_change_squared;
 }
 
@@ -115,20 +128,20 @@ int** SeamCarver::HorizontalInitPopulateEnergyArray() const {
       int bottom = 0;
       // handling wrap around cases
       if (row == 0) {
-        top = GetEnergy(height_ - 1, col + 1);
+        top = CalculateMaxEnergy();
       } else {
         top = GetEnergy(row - 1, col + 1);
       }
       if (row == height_ - 1) {
-        bottom = GetEnergy(0, col + 1);
+        bottom = CalculateMaxEnergy();
       } else {
         bottom = GetEnergy(row + 1, col + 1);
       }
       int lowest = 0;
       // which one is lowest
-      if (top < middle && top < bottom) {
+      if (top <= middle && top <= bottom) {
         lowest = top;
-      } else if (middle < top && middle < bottom) {
+      } else if (middle <= top && middle <= bottom) {
         lowest = middle;
       } else {
         lowest = bottom;
@@ -210,25 +223,24 @@ int** SeamCarver::VerticalInitPopulateEnergyArray() const {
       int middle = GetEnergy(row + 1, column);
       int right = 0;
       if (column == 0) {
-        left = GetEnergy(row + 1, width_ - 1);
+        left = CalculateMaxEnergy();
       } else {
         left = GetEnergy(row + 1, column - 1);
       }
       if (column == width_ - 1) {
-        right = GetEnergy(row + 1, 0);
+        right = CalculateMaxEnergy();
       } else {
         right = GetEnergy(row + 1, column + 1);
       }
       int lowest = 0;
-      if (left < middle && left < right) {
+      if (right <= middle && right <= left) {
+        lowest = right;
+      } else if (middle <= right && middle <= left) {
+        lowest = middle;
+      } else {
         lowest = left;
       }
-      if (middle < left && middle < right) {
-        lowest = middle;
-      }
-      if (right < middle && right < left) {
-        lowest = right;
-      }
+
       array[row][column] = GetEnergy(row, column) + lowest;
     }
   }
@@ -249,7 +261,7 @@ int* SeamCarver::TraceVerticalSeam(int** array) const {
     }
   }
 
-  // start tracing downwards
+  // start tracing downwards from pixel of min value
   seam[0] = starting_column;
   int column = 0;
   for (int row = 1; row < height_; row++) {

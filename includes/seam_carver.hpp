@@ -120,6 +120,8 @@ public:
 
   int* TraceVerticalSeam(int** array) const;
 
+  int CalculateMaxEnergy() const;
+
 private:
   ImagePPM image_;
   int height_ = 0;
