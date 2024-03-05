@@ -2,10 +2,6 @@
 
 #include "iostream"
 
-// implement the rest of SeamCarver's functions here
-
-// given functions below, DO NOT MODIFY
-
 // Overloaded constructor. Initializes the instance with a deep copy of image.
 SeamCarver::SeamCarver(const ImagePPM& image): image_(image) {
   height_ = image.GetHeight();
@@ -18,8 +14,6 @@ void SeamCarver::SetImage(const ImagePPM& image) {
   width_ = image.GetWidth();
   height_ = image.GetHeight();
 }
-
-// to implement
 
 // Returns the instance’s image
 const ImagePPM& SeamCarver::GetImage() const { return image_; }

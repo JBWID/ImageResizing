@@ -1,9 +1,5 @@
 #include "image_ppm.hpp"
 
-// implement the rest of ImagePPM's functions here
-
-// given functions below, DO NOT MODIFY
-
 // Overloaded constructor. Initializes the ImagePPM based on a plain PPM file at
 // the given path
 ImagePPM::ImagePPM(const std::string& path) {
@@ -92,8 +88,6 @@ std::istream& operator>>(std::istream& is, ImagePPM& image) {
   }
   return is;
 }
-
-// functions to implement
 
 // Returns the pixel in the image at (row, col).
 Pixel ImagePPM::GetPixel(int row, int col) const {

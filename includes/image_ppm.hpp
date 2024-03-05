@@ -10,38 +10,21 @@
 class ImagePPM {
 public:
   // default constructor
-  //
-  // not tested but you are welcome to initialize (or not) member
-  // variables however you like in this function
   ImagePPM() = default;
 
   // overloaded constructor
-  //
-  // initialize the instance given the file at path. You may assume that
-  // path is always valid and that a file exists at path
   ImagePPM(const std::string& path);
 
   // copy constructor.
-  //
-  // should intialize the instance as DEEP COPY of source (meaning all
-  // values should be the same, but chaning source will not change
-  // anything in this instance, and vice versa)
   ImagePPM(const ImagePPM& source);
 
   // assignment operator
-  //
-  // should set the instance to be a DEEP COPY of source. Note that the
-  // current instance (this) already exists and you should be wary of
-  // leaks and the possiblity of null pointers
   ImagePPM& operator=(const ImagePPM& source);
 
   // destructor
-  //
-  // releases all heap memory used by the instance
   ~ImagePPM();
 
-  // returns the Pixel at row col. You may assume that row and col
-  // will always be within the bounds of image_
+  // returns the Pixel at row col.
   Pixel GetPixel(int row, int col) const;
 
   // returns the width of the image
@@ -69,13 +52,7 @@ private:
   int width_ = 0;
   int max_color_value_ = 0;
   Pixel** pixels_ = nullptr;
-
-  // given help function, "clears" the data of the instance
   void Clear();
-
-  /**
-   * Add any helper methods you may need
-   */
 };
 
 #endif
