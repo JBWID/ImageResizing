@@ -120,12 +120,13 @@ public:
 
   int* TraceVerticalSeam(int** array) const;
 
-  int CalculateMaxEnergy() const;
+  int** InitEnergyArray() const;
 
 private:
   ImagePPM image_;
   int height_ = 0;
   int width_ = 0;
+  static const int kMaxEnergy = 2147483647;
 
   /**
    * Add any helper methods you may need
